@@ -6,9 +6,9 @@ import logging
 import time
 from pathlib import Path
 
-from etl.extract import extract_data
-from etl.transform import transform_data
-from etl.load import load_data
+from extract import extract_data
+from transform import transform_data
+from load import load_data
 
 logging.basicConfig(
     level=logging.INFO,
