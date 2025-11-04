@@ -88,6 +88,15 @@ div[class*="Select"] .Select-value-label {
     color: white !important;
 }
 
+.Select-option.is-disabled {
+    background-color: #F0F0F0 !important;
+    color: #2C3E50 !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    padding: 8px 12px !important;
+    cursor: default !important;
+}
+
 .Select-option.is-focused {
     background-color: #ECF0F1 !important;
     color: #2C3E50 !important;

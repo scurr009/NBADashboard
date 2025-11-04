@@ -23,15 +23,15 @@ wheels/
 .installed.cfg
 *.egg
 
-# DuckDB
-*.db
-*.duckdb
-*.wal
-
-# Data files (keep structure, ignore large files)
-data/processed/*.parquet
-data/processed/*.csv
+# DuckDB (generated files - will be created during deployment)
 data/duckdb/*.db
+data/duckdb/*.wal
+
+# Processed data (generated files - will be created during deployment)
+data/processed/*.parquet
+
+# Keep raw data for deployment
+# data/raw/*.csv - DO NOT IGNORE (needed for ETL)
 
 # IDE
 .vscode/

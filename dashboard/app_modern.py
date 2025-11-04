@@ -86,6 +86,13 @@ METRICS = {
 # Top N options
 TOP_N_OPTIONS = [3, 5, 10, 15, 20]
 
+# Modern NBA teams (current 30 teams as of 2024-25 season)
+MODERN_TEAMS = {
+    'ATL', 'BOS', 'BRK', 'CHO', 'CHI', 'CLE', 'DAL', 'DEN', 'DET', 'GSW',
+    'HOU', 'IND', 'LAC', 'LAL', 'MEM', 'MIA', 'MIL', 'MIN', 'NOP', 'NYK',
+    'OKC', 'ORL', 'PHI', 'PHO', 'POR', 'SAC', 'SAS', 'TOR', 'UTA', 'WAS'
+}
+
 # ============================================================================
 # CREATE DASH APP
 # ============================================================================
@@ -228,8 +235,20 @@ app.layout = html.Div([
                 }),
                 dcc.Dropdown(
                     id='team-dropdown',
-                    options=[{'label': 'All Teams', 'value': 'ALL'}] + 
-                            [{'label': team, 'value': team} for team in all_teams],
+                    options=[
+                        {'label': 'All Teams', 'value': 'ALL'},
+                        {
+                            'label': 'Modern Teams (Current 30)',
+                            'value': 'modern_group',
+                            'disabled': True
+                        }
+                    ] + [{'label': f'  {team}', 'value': team} for team in sorted(all_teams) if team in MODERN_TEAMS] + [
+                        {
+                            'label': 'Other Teams (Historical)',
+                            'value': 'other_group',
+                            'disabled': True
+                        }
+                    ] + [{'label': f'  {team}', 'value': team} for team in sorted(all_teams) if team not in MODERN_TEAMS],
                     value='ALL',
                     clearable=True,
                     placeholder='Select team...',
@@ -539,8 +558,11 @@ def update_chart(metric, top_n, year_from, year_to, team, position, player):
 # RUN APP
 # ============================================================================
 
+# Expose server for deployment (Render, Heroku, etc.)
+server = app.server
+
 if __name__ == '__main__':
     print("\n🏀 NBA Analytics Dashboard")
     print("Modern, Apple-inspired design")
     print("Opening at: http://127.0.0.1:8051/\n")
-    app.run(debug=True, port=8051)
+    app.run(debug=True, host='0.0.0.0', port=8051)
