@@ -1,0 +1,270 @@
+/* Modern Dashboard Styles - Apple-inspired */
+
+/* ============================================================================
+   GLOBAL STYLES
+   ============================================================================ */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #FAFAFA;
+}
+
+/* ============================================================================
+   DROPDOWN STYLING - Dark sidebar theme
+   ============================================================================ */
+
+/* Force white text on dropdowns */
+.custom-dropdown .Select-value-label,
+.custom-dropdown .Select-value-label span,
+div[class*="Select"] .Select-value-label {
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
+}
+
+.Select-control {
+    height: 38px !important;
+    border: 1px solid rgba(255,255,255,0.25) !important;
+    border-radius: 6px !important;
+    background-color: rgba(255,255,255,0.15) !important;
+    transition: all 200ms ease !important;
+}
+
+.Select-control:hover {
+    background-color: rgba(255,255,255,0.2) !important;
+    border-color: rgba(255,255,255,0.4) !important;
+}
+
+.is-focused .Select-control {
+    border: 1px solid #3498DB !important;
+    background-color: rgba(255,255,255,0.15) !important;
+    box-shadow: 0 0 0 2px rgba(52,152,219,0.2) !important;
+}
+
+.Select-placeholder,
+.Select--single > .Select-control .Select-value {
+    line-height: 36px !important;
+    padding-left: 12px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: #FFFFFF !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
+}
+
+.Select-placeholder {
+    color: rgba(236,240,241,0.7) !important;
+    font-weight: 500 !important;
+}
+
+.Select-menu-outer {
+    border: 1px solid #BDC3C7 !important;
+    border-radius: 6px !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15) !important;
+    margin-top: 4px !important;
+    background-color: white !important;
+}
+
+.Select-option {
+    padding: 10px 12px !important;
+    font-size: 15px !important;
+    transition: background-color 150ms ease !important;
+    color: #2C3E50 !important;
+}
+
+.Select-option:hover {
+    background-color: #F5F5F5 !important;
+}
+
+.Select-option.is-selected {
+    background-color: #3498DB !important;
+    color: white !important;
+}
+
+.Select-option.is-focused {
+    background-color: #ECF0F1 !important;
+    color: #2C3E50 !important;
+}
+
+.Select-arrow-zone {
+    padding-right: 8px !important;
+}
+
+.Select-arrow {
+    border-color: rgba(236,240,241,0.7) transparent transparent !important;
+}
+
+.is-open .Select-arrow {
+    border-color: transparent transparent rgba(236,240,241,0.7) !important;
+}
+
+/* ============================================================================
+   NUMBER INPUT STYLING
+   ============================================================================ */
+
+input[type="number"] {
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"]:focus {
+    outline: none !important;
+    border: 1px solid #3498DB !important;
+    box-shadow: 0 0 0 2px rgba(52,152,219,0.2) !important;
+}
+
+input[type="number"]:hover {
+    background-color: rgba(255,255,255,0.15) !important;
+    border-color: rgba(255,255,255,0.3) !important;
+}
+
+/* ============================================================================
+   RANGE SLIDER STYLING
+   ============================================================================ */
+
+.rc-slider {
+    margin: 16px 0 24px 0 !important;
+}
+
+.rc-slider-rail {
+    height: 3px !important;
+    background-color: rgba(255,255,255,0.2) !important;
+}
+
+.rc-slider-track {
+    height: 3px !important;
+    background-color: #3498DB !important;
+}
+
+.rc-slider-handle {
+    width: 16px !important;
+    height: 16px !important;
+    margin-top: -6px !important;
+    border: 2px solid #3498DB !important;
+    background-color: white !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
+    transition: all 150ms ease !important;
+}
+
+.rc-slider-handle:hover {
+    transform: scale(1.1) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.16) !important;
+}
+
+.rc-slider-handle:active {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
+    transform: scale(1.05) !important;
+}
+
+.rc-slider-handle-dragging {
+    border-color: #007AFF !important;
+    box-shadow: 0 4px 12px rgba(0,122,255,0.3) !important;
+}
+
+.rc-slider-mark-text {
+    font-size: 10px !important;
+    color: rgba(236,240,241,0.5) !important;
+}
+
+.rc-slider-mark-text-active {
+    color: #ECF0F1 !important;
+}
+
+/* ============================================================================
+   SCROLLBAR STYLING
+   ============================================================================ */
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #D2D2D7;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #86868B;
+}
+
+/* ============================================================================
+   PLOTLY CHART STYLING
+   ============================================================================ */
+
+.js-plotly-plot .plotly .modebar {
+    display: none !important;
+}
+
+.js-plotly-plot .plotly .svg-container {
+    border-radius: 12px;
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 300ms ease-out;
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    /* Mobile styles would go here */
+    /* For now, dashboard is desktop-only */
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================ */
+
+.shadow-sm {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.shadow-md {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+.rounded-sm {
+    border-radius: 6px;
+}
+
+.rounded-md {
+    border-radius: 12px;
+}
+
+.rounded-lg {
+    border-radius: 16px;
+}

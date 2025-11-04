@@ -14,28 +14,32 @@ import os
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 # ============================================================================
-# DUCKDB SETUP - Scalable to billions of rows
+# DUCKDB SETUP - Connect to cleaned database from ETL pipeline
 # ============================================================================
 
-# Connect to DuckDB (in-memory for demo, use file for persistence)
-con = duckdb.connect(':memory:')
+# Connect to the database created by ETL pipeline
+db_path = os.path.join(script_dir, 'data', 'duckdb', 'nba.db')
 
-# Load CSV into DuckDB (one-time operation)
-# For production: use Parquet files for 10x better performance
-csv_path = os.path.join(script_dir, 'NBA_Player_Totals.csv')
-con.execute(f"""
-    CREATE TABLE players AS 
-    SELECT * FROM read_csv_auto('{csv_path}', 
-        nullstr='NA',
-        sample_size=-1
-    )
-""")
+if not os.path.exists(db_path):
+    print("\n" + "="*70)
+    print("❌ ERROR: Database not found!")
+    print("="*70)
+    print(f"Expected location: {db_path}")
+    print("\nPlease run the ETL pipeline first:")
+    print("  python -m etl.pipeline")
+    print("="*70 + "\n")
+    exit(1)
 
-# Create indexes for fast filtering (critical for large datasets)
-con.execute("CREATE INDEX idx_season ON players(season)")
-con.execute("CREATE INDEX idx_team ON players(tm)")
-con.execute("CREATE INDEX idx_position ON players(pos)")
-con.execute("CREATE INDEX idx_player ON players(player)")
+con = duckdb.connect(db_path, read_only=True)
+
+# Verify table exists
+try:
+    count = con.execute("SELECT COUNT(*) FROM players").fetchone()[0]
+    print(f"\n✅ Connected to database: {count:,} rows")
+except:
+    print("\n❌ ERROR: 'players' table not found in database")
+    print("Please run the ETL pipeline first: python -m etl.pipeline\n")
+    exit(1)
 
 print("\n" + "="*70)
 print("📊 DuckDB Database Initialized")
@@ -43,14 +47,20 @@ print("="*70)
 
 # Get metadata for filters
 seasons = con.execute("SELECT DISTINCT season FROM players ORDER BY season").fetchdf()
-teams = con.execute("SELECT DISTINCT tm FROM players WHERE tm != 'TOT' ORDER BY tm").fetchdf()
+teams = con.execute("SELECT DISTINCT tm FROM players ORDER BY tm").fetchdf()
 positions = con.execute("SELECT DISTINCT pos FROM players ORDER BY pos").fetchdf()
-players_list = con.execute("SELECT DISTINCT player FROM players ORDER BY player").fetchdf()
+# Get player_id and player name for dropdown
+players_list = con.execute("""
+    SELECT DISTINCT player_id, player 
+    FROM players 
+    ORDER BY player
+""").fetchdf()
 
 all_seasons = seasons['season'].tolist()
 all_teams = teams['tm'].tolist()
 all_positions = positions['pos'].tolist()
-all_players = players_list['player'].tolist()
+# Create list of tuples (player_id, player_name) for dropdown
+all_players = list(zip(players_list['player_id'].tolist(), players_list['player'].tolist()))
 
 print(f"✅ Loaded {con.execute('SELECT COUNT(*) FROM players').fetchone()[0]:,} rows")
 print(f"✅ {len(all_players):,} unique players")
@@ -68,16 +78,18 @@ LINE_COLORS = [
 # ============================================================================
 # METRIC DEFINITIONS
 # ============================================================================
+# Using pre-calculated metrics from ETL pipeline for better performance
 metrics = {
-    'ppg': {'name': 'Points Per Game', 'calc': 'pts / g', 'agg': 'AVG'},
-    'rpg': {'name': 'Rebounds Per Game', 'calc': 'trb / g', 'agg': 'AVG'},
-    'apg': {'name': 'Assists Per Game', 'calc': 'ast / g', 'agg': 'AVG'},
+    'ppg': {'name': 'Points Per Game', 'calc': 'ppg', 'agg': 'AVG'},
+    'rpg': {'name': 'Rebounds Per Game', 'calc': 'rpg', 'agg': 'AVG'},
+    'apg': {'name': 'Assists Per Game', 'calc': 'apg', 'agg': 'AVG'},
+    'mpg': {'name': 'Minutes Per Game', 'calc': 'mpg', 'agg': 'AVG'},
     'spg': {'name': 'Steals Per Game', 'calc': 'stl / g', 'agg': 'AVG'},
     'bpg': {'name': 'Blocks Per Game', 'calc': 'blk / g', 'agg': 'AVG'},
-    'mpg': {'name': 'Minutes Per Game', 'calc': 'mp / g', 'agg': 'AVG'},
     'fg_percent': {'name': 'Field Goal %', 'calc': 'fg_percent', 'agg': 'AVG'},
     'x3p_percent': {'name': '3-Point %', 'calc': 'x3p_percent', 'agg': 'AVG'},
     'ft_percent': {'name': 'Free Throw %', 'calc': 'ft_percent', 'agg': 'AVG'},
+    'ts_percent': {'name': 'True Shooting %', 'calc': 'ts_percent', 'agg': 'AVG'},
     'pts': {'name': 'Total Points', 'calc': 'pts', 'agg': 'SUM'},
     'trb': {'name': 'Total Rebounds', 'calc': 'trb', 'agg': 'SUM'},
     'ast': {'name': 'Total Assists', 'calc': 'ast', 'agg': 'SUM'},
@@ -153,7 +165,7 @@ app.layout = html.Div([
                 dcc.Dropdown(
                     id='player-dropdown',
                     options=[{'label': 'All Players', 'value': 'ALL'}] + 
-                            [{'label': player, 'value': player} for player in all_players],
+                            [{'label': name, 'value': str(pid)} for pid, name in all_players],
                     value='ALL',
                     clearable=False,
                     placeholder='Type to search...',
@@ -262,7 +274,7 @@ def update_chart(metric, year_range, team, position, player):
     if position != 'ALL':
         where_clauses.append(f"pos = '{position}'")
     if player != 'ALL':
-        where_clauses.append(f"player = '{player}'")
+        where_clauses.append(f"player_id = {player}")
     
     where_clause = " AND ".join(where_clauses)
     
@@ -277,22 +289,24 @@ def update_chart(metric, year_range, team, position, player):
     WITH player_rankings AS (
         -- Calculate career metric for ranking (within filters)
         SELECT 
+            player_id,
             player,
             {metric_agg}({metric_calc}) as career_metric
         FROM players
         WHERE {where_clause}
-        GROUP BY player
+        GROUP BY player_id, player
         ORDER BY career_metric DESC
         LIMIT 10
     ),
     player_seasons AS (
         -- Get season-by-season data for top 10 players
         SELECT 
+            p.player_id,
             p.player,
             p.season,
             {metric_calc} as metric_value
         FROM players p
-        INNER JOIN player_rankings pr ON p.player = pr.player
+        INNER JOIN player_rankings pr ON p.player_id = pr.player_id
         ORDER BY p.player, p.season
     )
     SELECT * FROM player_seasons
