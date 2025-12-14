@@ -246,12 +246,216 @@ input[type="number"]:hover {
 }
 
 /* ============================================================================
+   HAMBURGER MENU
+   ============================================================================ */
+
+.hamburger-menu {
+    display: none;
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 1001;
+    background-color: #2C3E50;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transition: all 200ms ease;
+}
+
+.hamburger-menu:hover {
+    background-color: #34495E;
+    transform: scale(1.05);
+}
+
+.hamburger-menu:active {
+    transform: scale(0.95);
+}
+
+.hamburger-icon {
+    width: 24px;
+    height: 20px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.hamburger-icon span {
+    display: block;
+    height: 3px;
+    width: 100%;
+    background-color: #ECF0F1;
+    border-radius: 2px;
+    transition: all 200ms ease;
+}
+
+/* Mobile overlay */
+.mobile-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 300ms ease;
+}
+
+.mobile-overlay.active {
+    opacity: 1;
+}
+
+/* ============================================================================
    RESPONSIVE DESIGN
    ============================================================================ */
 
+/* Tablet and below */
+@media (max-width: 1024px) {
+    #sidebar {
+        width: 260px !important;
+    }
+
+    #main-content {
+        margin-left: 260px !important;
+        padding: 32px !important;
+    }
+}
+
+/* Mobile landscape and below */
 @media (max-width: 768px) {
-    /* Mobile styles would go here */
-    /* For now, dashboard is desktop-only */
+    /* Show hamburger menu */
+    .hamburger-menu {
+        display: block !important;
+    }
+
+    .mobile-overlay {
+        display: block !important;
+    }
+
+    /* Sidebar slides in from left */
+    #sidebar {
+        position: fixed !important;
+        left: -280px !important;
+        width: 280px !important;
+        transition: left 300ms ease !important;
+        z-index: 1000 !important;
+        box-shadow: 4px 0 16px rgba(0,0,0,0.2) !important;
+    }
+
+    #sidebar.mobile-open {
+        left: 0 !important;
+    }
+
+    /* Main content takes full width */
+    #main-content {
+        margin-left: 0 !important;
+        padding: 72px 20px 20px 20px !important;
+        width: 100% !important;
+    }
+
+    /* Smaller headers */
+    #main-content h2 {
+        font-size: 24px !important;
+    }
+
+    #main-content p {
+        font-size: 14px !important;
+    }
+
+    /* Comparison view - stack vertically */
+    .comparison-players {
+        flex-direction: column !important;
+    }
+
+    .comparison-players > div {
+        margin-right: 0 !important;
+        margin-bottom: 16px !important;
+    }
+
+    .comparison-players > div:last-child {
+        margin-bottom: 0 !important;
+    }
+
+    /* Stats table and insights - stack vertically */
+    .comparison-bottom {
+        flex-direction: column !important;
+    }
+
+    .comparison-bottom > div {
+        margin-right: 0 !important;
+        margin-bottom: 16px !important;
+        width: 100% !important;
+    }
+
+    .comparison-bottom > div:last-child {
+        margin-bottom: 0 !important;
+    }
+
+    /* Reduce padding on cards */
+    .card {
+        padding: 16px !important;
+    }
+
+    /* Smaller chart heights */
+    .comparison-radar {
+        height: 400px !important;
+    }
+}
+
+/* Mobile portrait */
+@media (max-width: 480px) {
+    /* Even smaller headers */
+    #main-content h2 {
+        font-size: 20px !important;
+    }
+
+    #main-content h3 {
+        font-size: 16px !important;
+    }
+
+    #main-content p {
+        font-size: 13px !important;
+    }
+
+    /* Tighter padding */
+    #main-content {
+        padding: 64px 12px 12px 12px !important;
+    }
+
+    .card {
+        padding: 12px !important;
+        border-radius: 8px !important;
+    }
+
+    /* Smaller radar chart */
+    .comparison-radar {
+        height: 320px !important;
+    }
+
+    /* Adjust table font size */
+    table {
+        font-size: 12px !important;
+    }
+
+    table th,
+    table td {
+        padding: 8px 6px !important;
+    }
+
+    /* Reduce dropdown font size slightly */
+    .Select-placeholder,
+    .Select--single > .Select-control .Select-value {
+        font-size: 14px !important;
+    }
+
+    .Select-option {
+        font-size: 14px !important;
+        padding: 8px 10px !important;
+    }
 }
 
 /* ============================================================================

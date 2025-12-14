@@ -109,8 +109,20 @@ app.title = "NBA Analytics"
 # ============================================================================
 
 app.layout = html.Div([
+    # Hamburger Menu Button (Mobile only)
+    html.Button([
+        html.Div([
+            html.Span(),
+            html.Span(),
+            html.Span(),
+        ], className='hamburger-icon')
+    ], id='hamburger-btn', className='hamburger-menu'),
+
+    # Mobile Overlay (to close sidebar when clicking outside)
+    html.Div(id='mobile-overlay', className='mobile-overlay'),
+
     # Sidebar - Dark theme like Milliman
-    html.Div([
+    html.Div(id='sidebar', children=[
         # Logo/Title
         html.Div([
             html.Div('🏀', style={
@@ -339,7 +351,7 @@ app.layout = html.Div([
             'fontSize': '11px',
             'color': COLORS['sidebar_text']
         }),
-        
+
     ], style={
         'width': '280px',
         'height': '100vh',
@@ -352,9 +364,9 @@ app.layout = html.Div([
         'top': '0',
         'fontFamily': "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
     }),
-    
+
     # Main Content
-    html.Div([
+    html.Div(id='main-content', children=[
         # Timeline View
         html.Div([
             # Header
@@ -402,7 +414,14 @@ app.layout = html.Div([
             ], style={'marginBottom': '32px'}),
 
             # Player Selection
-            html.Div([
+            html.Div(className='comparison-players', style={
+                'display': 'flex',
+                'marginBottom': '32px',
+                'padding': '24px',
+                'backgroundColor': 'white',
+                'borderRadius': '12px',
+                'boxShadow': '0 1px 3px rgba(0,0,0,0.1)'
+            }, children=[
                 html.Div([
                     html.Label('Player 1', style={
                         'fontSize': '14px',
@@ -456,34 +475,34 @@ app.layout = html.Div([
                         style={'backgroundColor': 'white'}
                     ),
                 ], style={'flex': '1'}),
-            ], style={
-                'display': 'flex',
+            ]),
+
+            # Radar Chart
+            html.Div(className='card comparison-radar', style={
                 'marginBottom': '32px',
                 'padding': '24px',
                 'backgroundColor': 'white',
                 'borderRadius': '12px',
                 'boxShadow': '0 1px 3px rgba(0,0,0,0.1)'
-            }),
-
-            # Radar Chart
-            html.Div([
+            }, children=[
                 dcc.Graph(
                     id='comparison-radar',
                     config={'displayModeBar': False},
                     style={'height': '500px'}
                 ),
-            ], style={
-                'marginBottom': '32px',
-                'padding': '24px',
-                'backgroundColor': 'white',
-                'borderRadius': '12px',
-                'boxShadow': '0 1px 3px rgba(0,0,0,0.1)'
-            }),
+            ]),
 
             # Stats Table and Insights
-            html.Div([
+            html.Div(className='comparison-bottom', style={'display': 'flex'}, children=[
                 # Stats Table
-                html.Div([
+                html.Div(className='card', style={
+                    'flex': '1',
+                    'marginRight': '16px',
+                    'padding': '24px',
+                    'backgroundColor': 'white',
+                    'borderRadius': '12px',
+                    'boxShadow': '0 1px 3px rgba(0,0,0,0.1)'
+                }, children=[
                     html.H3('Career Statistics', style={
                         'fontSize': '20px',
                         'fontWeight': '600',
@@ -491,17 +510,16 @@ app.layout = html.Div([
                         'marginBottom': '16px'
                     }),
                     html.Div(id='comparison-table'),
-                ], style={
+                ]),
+
+                # Insights Panel
+                html.Div(className='card', style={
                     'flex': '1',
-                    'marginRight': '16px',
                     'padding': '24px',
                     'backgroundColor': 'white',
                     'borderRadius': '12px',
                     'boxShadow': '0 1px 3px rgba(0,0,0,0.1)'
-                }),
-
-                # Insights Panel
-                html.Div([
+                }, children=[
                     html.H3('Insights', style={
                         'fontSize': '20px',
                         'fontWeight': '600',
@@ -513,14 +531,8 @@ app.layout = html.Div([
                         'lineHeight': '1.6',
                         'color': COLORS['text_secondary']
                     }),
-                ], style={
-                    'flex': '1',
-                    'padding': '24px',
-                    'backgroundColor': 'white',
-                    'borderRadius': '12px',
-                    'boxShadow': '0 1px 3px rgba(0,0,0,0.1)'
-                }),
-            ], style={'display': 'flex'}),
+                ]),
+            ]),
 
         ], id='comparison-view', style={'display': 'none'}),
 
@@ -553,6 +565,33 @@ def toggle_view(view):
         return {'display': 'block'}, {'display': 'none'}
     else:
         return {'display': 'none'}, {'display': 'block'}
+
+# Callback to toggle mobile sidebar
+@app.callback(
+    [Output('sidebar', 'className'),
+     Output('mobile-overlay', 'className')],
+    [Input('hamburger-btn', 'n_clicks'),
+     Input('mobile-overlay', 'n_clicks')],
+    prevent_initial_call=True
+)
+def toggle_sidebar(hamburger_clicks, overlay_clicks):
+    from dash import callback_context
+
+    # Determine which input triggered the callback
+    if not callback_context.triggered:
+        return '', ''
+
+    trigger_id = callback_context.triggered[0]['prop_id'].split('.')[0]
+
+    # Toggle sidebar based on which element was clicked
+    if trigger_id == 'hamburger-btn':
+        # Open sidebar
+        return 'mobile-open', 'active'
+    elif trigger_id == 'mobile-overlay':
+        # Close sidebar when overlay is clicked
+        return '', ''
+
+    return '', ''
 
 # Note: Cascading filter callback removed for now due to technical issues
 # The player dropdown will show all players, but the chart will still filter correctly
