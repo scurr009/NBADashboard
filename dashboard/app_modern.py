@@ -134,6 +134,30 @@ app.layout = html.Div([
             'padding': '24px 20px',
             'borderBottom': f"1px solid rgba(255,255,255,0.1)"
         }),
+
+        # View Selector (Tabs in Sidebar)
+        html.Div([
+            html.Label('View', style={
+                'fontSize': '13px',
+                'fontWeight': '500',
+                'color': COLORS['sidebar_text'],
+                'marginBottom': '8px',
+                'display': 'block'
+            }),
+            dcc.Dropdown(
+                id='view-selector',
+                options=[
+                    {'label': '📈 Performance Over Time', 'value': 'timeline'},
+                    {'label': '⚔️ Player Comparison', 'value': 'comparison'}
+                ],
+                value='timeline',
+                clearable=False,
+                className='custom-dropdown'
+            ),
+        ], style={
+            'padding': '20px',
+            'borderBottom': f"1px solid rgba(255,255,255,0.1)"
+        }),
         
         # Filters
         html.Div([
@@ -331,31 +355,175 @@ app.layout = html.Div([
     
     # Main Content
     html.Div([
-        # Header
+        # Timeline View
         html.Div([
-            html.H2(id='chart-title', children='Top 10 Players', style={
-                'fontSize': '32px',
-                'fontWeight': '600',
-                'color': COLORS['text_primary'],
-                'margin': '0',
-                'letterSpacing': '-0.5px'
+            # Header
+            html.Div([
+                html.H2(id='chart-title', children='Top 10 Players', style={
+                    'fontSize': '32px',
+                    'fontWeight': '600',
+                    'color': COLORS['text_primary'],
+                    'margin': '0',
+                    'letterSpacing': '-0.5px'
+                }),
+                html.P(id='chart-subtitle', children='Select filters to explore', style={
+                    'fontSize': '16px',
+                    'color': COLORS['text_secondary'],
+                    'margin': '8px 0 0 0'
+                }),
+            ], style={
+                'marginBottom': '32px'
             }),
-            html.P(id='chart-subtitle', children='Select filters to explore', style={
-                'fontSize': '16px',
-                'color': COLORS['text_secondary'],
-                'margin': '8px 0 0 0'
+
+            # Chart
+            dcc.Graph(
+                id='main-chart',
+                config={'displayModeBar': False},
+                style={'height': 'calc(100vh - 200px)'}
+            ),
+        ], id='timeline-view', style={'display': 'block'}),
+
+        # Comparison View
+        html.Div([
+            # Header
+            html.Div([
+                html.H2('Player Comparison', style={
+                    'fontSize': '32px',
+                    'fontWeight': '600',
+                    'color': COLORS['text_primary'],
+                    'margin': '0',
+                    'letterSpacing': '-0.5px'
+                }),
+                html.P('Compare players side-by-side across key statistics', style={
+                    'fontSize': '16px',
+                    'color': COLORS['text_secondary'],
+                    'margin': '8px 0 0 0'
+                }),
+            ], style={'marginBottom': '32px'}),
+
+            # Player Selection
+            html.Div([
+                html.Div([
+                    html.Label('Player 1', style={
+                        'fontSize': '14px',
+                        'fontWeight': '500',
+                        'color': COLORS['text_primary'],
+                        'marginBottom': '8px',
+                        'display': 'block'
+                    }),
+                    dcc.Dropdown(
+                        id='compare-player-1',
+                        options=[{'label': name, 'value': str(pid)} for pid, name in all_players],
+                        value=None,
+                        placeholder='Select player 1...',
+                        className='custom-dropdown',
+                        style={'backgroundColor': 'white'}
+                    ),
+                ], style={'flex': '1', 'marginRight': '16px'}),
+
+                html.Div([
+                    html.Label('Player 2', style={
+                        'fontSize': '14px',
+                        'fontWeight': '500',
+                        'color': COLORS['text_primary'],
+                        'marginBottom': '8px',
+                        'display': 'block'
+                    }),
+                    dcc.Dropdown(
+                        id='compare-player-2',
+                        options=[{'label': name, 'value': str(pid)} for pid, name in all_players],
+                        value=None,
+                        placeholder='Select player 2...',
+                        className='custom-dropdown',
+                        style={'backgroundColor': 'white'}
+                    ),
+                ], style={'flex': '1', 'marginRight': '16px'}),
+
+                html.Div([
+                    html.Label('Player 3 (Optional)', style={
+                        'fontSize': '14px',
+                        'fontWeight': '500',
+                        'color': COLORS['text_primary'],
+                        'marginBottom': '8px',
+                        'display': 'block'
+                    }),
+                    dcc.Dropdown(
+                        id='compare-player-3',
+                        options=[{'label': name, 'value': str(pid)} for pid, name in all_players],
+                        value=None,
+                        placeholder='Select player 3...',
+                        className='custom-dropdown',
+                        style={'backgroundColor': 'white'}
+                    ),
+                ], style={'flex': '1'}),
+            ], style={
+                'display': 'flex',
+                'marginBottom': '32px',
+                'padding': '24px',
+                'backgroundColor': 'white',
+                'borderRadius': '12px',
+                'boxShadow': '0 1px 3px rgba(0,0,0,0.1)'
             }),
-        ], style={
-            'marginBottom': '32px'
-        }),
-        
-        # Chart
-        dcc.Graph(
-            id='main-chart',
-            config={'displayModeBar': False},
-            style={'height': 'calc(100vh - 200px)'}
-        ),
-        
+
+            # Radar Chart
+            html.Div([
+                dcc.Graph(
+                    id='comparison-radar',
+                    config={'displayModeBar': False},
+                    style={'height': '500px'}
+                ),
+            ], style={
+                'marginBottom': '32px',
+                'padding': '24px',
+                'backgroundColor': 'white',
+                'borderRadius': '12px',
+                'boxShadow': '0 1px 3px rgba(0,0,0,0.1)'
+            }),
+
+            # Stats Table and Insights
+            html.Div([
+                # Stats Table
+                html.Div([
+                    html.H3('Career Statistics', style={
+                        'fontSize': '20px',
+                        'fontWeight': '600',
+                        'color': COLORS['text_primary'],
+                        'marginBottom': '16px'
+                    }),
+                    html.Div(id='comparison-table'),
+                ], style={
+                    'flex': '1',
+                    'marginRight': '16px',
+                    'padding': '24px',
+                    'backgroundColor': 'white',
+                    'borderRadius': '12px',
+                    'boxShadow': '0 1px 3px rgba(0,0,0,0.1)'
+                }),
+
+                # Insights Panel
+                html.Div([
+                    html.H3('Insights', style={
+                        'fontSize': '20px',
+                        'fontWeight': '600',
+                        'color': COLORS['text_primary'],
+                        'marginBottom': '16px'
+                    }),
+                    html.Div(id='comparison-insights', style={
+                        'fontSize': '15px',
+                        'lineHeight': '1.6',
+                        'color': COLORS['text_secondary']
+                    }),
+                ], style={
+                    'flex': '1',
+                    'padding': '24px',
+                    'backgroundColor': 'white',
+                    'borderRadius': '12px',
+                    'boxShadow': '0 1px 3px rgba(0,0,0,0.1)'
+                }),
+            ], style={'display': 'flex'}),
+
+        ], id='comparison-view', style={'display': 'none'}),
+
     ], style={
         'marginLeft': '280px',
         'padding': '48px',
@@ -373,6 +541,18 @@ app.layout = html.Div([
 # ============================================================================
 # CALLBACKS
 # ============================================================================
+
+# Callback to toggle views
+@app.callback(
+    [Output('timeline-view', 'style'),
+     Output('comparison-view', 'style')],
+    [Input('view-selector', 'value')]
+)
+def toggle_view(view):
+    if view == 'timeline':
+        return {'display': 'block'}, {'display': 'none'}
+    else:
+        return {'display': 'none'}, {'display': 'block'}
 
 # Note: Cascading filter callback removed for now due to technical issues
 # The player dropdown will show all players, but the chart will still filter correctly
@@ -551,8 +731,223 @@ def update_chart(metric, top_n, year_from, year_to, team, position, player):
     )
     
     perf_text = f"Query: {query_time*1000:.0f}ms"
-    
+
     return fig, perf_text, title, subtitle
+
+# Callback for player comparison
+@app.callback(
+    [Output('comparison-radar', 'figure'),
+     Output('comparison-table', 'children'),
+     Output('comparison-insights', 'children')],
+    [Input('compare-player-1', 'value'),
+     Input('compare-player-2', 'value'),
+     Input('compare-player-3', 'value')]
+)
+def update_comparison(player1_id, player2_id, player3_id):
+    # Filter out None values
+    player_ids = [p for p in [player1_id, player2_id, player3_id] if p is not None]
+
+    if len(player_ids) < 2:
+        # Not enough players selected
+        empty_fig = go.Figure()
+        empty_fig.add_annotation(
+            text="Select at least 2 players to compare",
+            xref="paper", yref="paper",
+            x=0.5, y=0.5, showarrow=False,
+            font=dict(size=16, color=COLORS['text_secondary'])
+        )
+        empty_fig.update_layout(
+            plot_bgcolor='white',
+            paper_bgcolor='white',
+            xaxis=dict(visible=False),
+            yaxis=dict(visible=False)
+        )
+
+        empty_table = html.P("Select players to see comparison",
+                            style={'color': COLORS['text_secondary'], 'textAlign': 'center'})
+        empty_insights = html.P("Select players to see insights",
+                               style={'color': COLORS['text_secondary']})
+
+        return empty_fig, empty_table, empty_insights
+
+    # Query player career stats
+    query = f"""
+    SELECT
+        player_id,
+        player,
+        COUNT(DISTINCT season) as seasons,
+        SUM(g) as games,
+        ROUND(SUM(pts) * 1.0 / SUM(g), 1) as ppg,
+        ROUND(SUM(trb) * 1.0 / SUM(g), 1) as rpg,
+        ROUND(SUM(ast) * 1.0 / SUM(g), 1) as apg,
+        ROUND(SUM(stl) * 1.0 / SUM(g), 1) as spg,
+        ROUND(SUM(blk) * 1.0 / SUM(g), 1) as bpg,
+        ROUND(SUM(fg) * 100.0 / NULLIF(SUM(fga), 0), 1) as fg_pct,
+        ROUND(SUM(fg3) * 100.0 / NULLIF(SUM(fg3a), 0), 1) as fg3_pct,
+        ROUND(SUM(ft) * 100.0 / NULLIF(SUM(fta), 0), 1) as ft_pct,
+        SUM(pts) as total_pts,
+        SUM(trb) as total_trb,
+        SUM(ast) as total_ast
+    FROM players
+    WHERE player_id IN ({','.join(player_ids)})
+    GROUP BY player_id, player
+    ORDER BY player
+    """
+
+    df = con.execute(query).fetchdf()
+
+    # Create radar chart
+    fig = go.Figure()
+
+    # Stats to show on radar chart
+    radar_stats = ['ppg', 'rpg', 'apg', 'spg', 'bpg', 'fg_pct']
+    radar_labels = ['PPG', 'RPG', 'APG', 'SPG', 'BPG', 'FG%']
+
+    # Normalize percentages to similar scale as counting stats (0-30 range)
+    # We'll scale FG% from 0-100 to 0-30
+    def normalize_value(value, stat):
+        if stat == 'fg_pct':
+            return (value / 100.0) * 30 if value is not None else 0
+        return value if value is not None else 0
+
+    for idx, row in df.iterrows():
+        values = [normalize_value(row[stat], stat) for stat in radar_stats]
+        values.append(values[0])  # Close the loop
+
+        fig.add_trace(go.Scatterpolar(
+            r=values,
+            theta=radar_labels + [radar_labels[0]],
+            fill='toself',
+            name=row['player'],
+            line=dict(color=CHART_COLORS[idx % len(CHART_COLORS)], width=3),
+            fillcolor=CHART_COLORS[idx % len(CHART_COLORS)],
+            opacity=0.6
+        ))
+
+    fig.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0, 30],
+                gridcolor='#E8E8E8',
+                tickfont=dict(size=13, color=COLORS['text_secondary'])
+            ),
+            angularaxis=dict(
+                gridcolor='#E8E8E8',
+                tickfont=dict(size=14, color=COLORS['text_primary'], family="-apple-system"),
+            )
+        ),
+        showlegend=True,
+        legend=dict(
+            orientation='h',
+            yanchor='bottom',
+            y=-0.15,
+            xanchor='center',
+            x=0.5,
+            font=dict(size=15, family="-apple-system", color=COLORS['text_primary'])
+        ),
+        font=dict(family="-apple-system, BlinkMacSystemFont, 'Segoe UI'"),
+        paper_bgcolor='white',
+        plot_bgcolor='white',
+        margin=dict(l=80, r=80, t=40, b=100)
+    )
+
+    # Create comparison table
+    table_rows = []
+
+    # Header row
+    header_cells = [html.Th('Stat', style={'textAlign': 'left', 'padding': '12px', 'borderBottom': f'2px solid {COLORS["border"]}'})]
+    for _, row in df.iterrows():
+        header_cells.append(html.Th(row['player'], style={
+            'textAlign': 'center',
+            'padding': '12px',
+            'borderBottom': f'2px solid {COLORS["border"]}',
+            'fontWeight': '600'
+        }))
+    table_rows.append(html.Tr(header_cells))
+
+    # Data rows
+    stats_to_show = [
+        ('Games Played', 'games', 0),
+        ('Seasons', 'seasons', 0),
+        ('PPG', 'ppg', 1),
+        ('RPG', 'rpg', 1),
+        ('APG', 'apg', 1),
+        ('SPG', 'spg', 1),
+        ('BPG', 'bpg', 1),
+        ('FG%', 'fg_pct', 1),
+        ('3P%', 'fg3_pct', 1),
+        ('FT%', 'ft_pct', 1),
+        ('Total Points', 'total_pts', 0),
+        ('Total Rebounds', 'total_trb', 0),
+        ('Total Assists', 'total_ast', 0),
+    ]
+
+    for stat_name, stat_key, decimals in stats_to_show:
+        cells = [html.Td(stat_name, style={
+            'padding': '10px 12px',
+            'borderBottom': f'1px solid {COLORS["border"]}',
+            'fontWeight': '500'
+        })]
+
+        # Get values for this stat across all players
+        values = [row[stat_key] if row[stat_key] is not None else 0 for _, row in df.iterrows()]
+        max_val = max(values) if values else 0
+
+        for val in values:
+            is_best = (val == max_val and val > 0)
+            cells.append(html.Td(
+                f'{val:,.{decimals}f}',
+                style={
+                    'textAlign': 'center',
+                    'padding': '10px 12px',
+                    'borderBottom': f'1px solid {COLORS["border"]}',
+                    'fontWeight': '600' if is_best else 'normal',
+                    'color': COLORS['primary'] if is_best else COLORS['text_primary']
+                }
+            ))
+
+        table_rows.append(html.Tr(cells))
+
+    table = html.Table(table_rows, style={
+        'width': '100%',
+        'borderCollapse': 'collapse',
+        'fontSize': '14px'
+    })
+
+    # Generate insights
+    insights_list = []
+
+    for _, row in df.iterrows():
+        insights_list.append(html.Div([
+            html.Strong(f"{row['player']}: ", style={'color': COLORS['text_primary']}),
+            html.Span(f"{row['seasons']} seasons, {row['games']:,.0f} games, {row['ppg']} PPG career average")
+        ], style={'marginBottom': '12px'}))
+
+    # Find who's best at what
+    best_scorer = df.loc[df['ppg'].idxmax()]
+    best_rebounder = df.loc[df['rpg'].idxmax()]
+    best_playmaker = df.loc[df['apg'].idxmax()]
+
+    insights_list.append(html.Div([
+        html.Hr(style={'margin': '16px 0', 'border': 'none', 'borderTop': f'1px solid {COLORS["border"]}'}),
+        html.Strong('Best Scorer: ', style={'color': COLORS['text_primary']}),
+        html.Span(f"{best_scorer['player']} ({best_scorer['ppg']} PPG)"),
+    ], style={'marginBottom': '8px'}))
+
+    insights_list.append(html.Div([
+        html.Strong('Best Rebounder: ', style={'color': COLORS['text_primary']}),
+        html.Span(f"{best_rebounder['player']} ({best_rebounder['rpg']} RPG)"),
+    ], style={'marginBottom': '8px'}))
+
+    insights_list.append(html.Div([
+        html.Strong('Best Playmaker: ', style={'color': COLORS['text_primary']}),
+        html.Span(f"{best_playmaker['player']} ({best_playmaker['apg']} APG)"),
+    ]))
+
+    insights = html.Div(insights_list)
+
+    return fig, table, insights
 
 # ============================================================================
 # RUN APP
